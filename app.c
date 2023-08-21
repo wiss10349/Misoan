@@ -52,38 +52,40 @@ void main_task(intptr_t unused) {
             ev3_lcd_draw_string("Waiting for Bluetooth",0,0);
             tslp_tsk(100);
         }
-        uint8_t c = fgetc(bt);
+        char c = fgetc(bt);
         //sus_tsk(IDLE_TASK);
-        if(distance < 10){
+        ev3_lcd_draw_string("Misoan is alive!!!",0,0);
+        switch(c){
+        case 'w':
+            fprintf(bt, "Move forward.\n");
+            ev3_lcd_draw_string("WWW",0,60);
+            ev3_motor_set_power(L_motor,-10);
+            ev3_motor_set_power(R_motor,-10);
+            break;
+
+        case 's':
+            fprintf(bt, "Move backward.\n");
+            ev3_lcd_draw_string("SSS",0,60);
+            ev3_motor_set_power(L_motor,10);
+            ev3_motor_set_power(R_motor,10);
+            break;
+
+        default:
+            ev3_motor_stop(L_motor, false);
+            ev3_motor_stop(R_motor, false);
+        }
+        tslp_tsk(100);
+        // 障害物検知
+        if((distance < 10) && (c != 'q')){
             ev3_lcd_draw_string("Misoan is scared!!",0,0);
             //fprintf(bt, "Misoan in scared.\n");
-            //while(distance < 10){
-                ev3_motor_stop(L_motor, false);
-                ev3_motor_stop(R_motor, false);
-            //}
-        }else{
-            ev3_lcd_draw_string("Misoan is alive!!!",0,0);
-            switch(c){
-            case 'w':
-                fprintf(bt, "Move forward.\n");
-                ev3_lcd_draw_string("WWW",0,60);
-                ev3_motor_set_power(L_motor,-10);
-                ev3_motor_set_power(R_motor,-10);
-                break;
-            
-            case 's':
-                fprintf(bt, "Move backward.\n");
-                ev3_lcd_draw_string("SSS",0,60);
-                ev3_motor_set_power(L_motor,10);
-                ev3_motor_set_power(R_motor,10);
-                break;
-
-            default:
-                ev3_motor_stop(L_motor, false);
-                ev3_motor_stop(R_motor, false);
-            }
+            ev3_motor_stop(L_motor, false);
+            ev3_motor_stop(R_motor, false);
+            tslp_tsk(3000);
         }
-        tslp_tsk(10);
+        if(c == 'q'){
+            break;
+        }
     }
     ev3_stp_cyc(DIS_CYCHDR);
     ext_tsk();
